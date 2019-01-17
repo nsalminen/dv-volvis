@@ -84,13 +84,20 @@ public class Volume {
     ////////////////////////////////////////////////////////////////////// 
         
     // Function that computes the weights for one of the 4 samples involved in the 1D interpolation 
-    private float weight (float x, Boolean one_two_sample)
+    private float weight (float x)//, Boolean one_two_sample) TODO no clue what the one_two_sample is
     {
-         float result=1.0f;
-         
-         // to be implemented
+        float a = -0.5f;
+        x = (x < 0) ? -x : x;
+        float result = 0;
+        if (x < 1.0) {
+            result = (a + 2) * x * x * x - (a + 3) * x * x + 1;
+        } else if (x < 2.0) {
+             result = a * x * x * x - 5 * a * x * x + 8 * a * x - 4 * a;
+        } else {
+            result = 0;
+        }
        
-         return (float)result; 
+        return (float)result; 
    }
     
     //////////////////////////////////////////////////////////////////////
@@ -102,9 +109,12 @@ public class Volume {
     
     private float cubicinterpolate(float g0, float g1, float g2, float g3, float factor) {
        
-        // to be implemented              
+        float dx0 = 1 + factor;
+        float dx1 = factor;
+        float dx2 = 1 - factor;
+        float dx3 = 2 - factor;
         
-        float result = 1.0f;
+        float result = weight(dx0) * g0 + weight(dx1) * g1 + weight(dx2) * g2 + weight(dx3) * g3;
                             
         return result; 
     }
@@ -115,10 +125,49 @@ public class Volume {
     // 2D cubic interpolation implemented here. We do it for plane XY. Coord contains the position.
     // We assume the out of bounce checks have been done earlier
     private float bicubicinterpolateXY(double[] coord,int z) {
-            
-        // to be implemented              
         
-        float result = 1.0f;
+        float x = (float)coord[0];
+        float y = (float)coord[1];
+        //get coords for points around coord
+        int x1 = (int) Math.floor(coord[0]); 
+        int y1 = (int) Math.floor(coord[1]);        
+        
+        int x0 = x1 - 1;
+        int y0 = y1 - 1;
+     
+        int x2 = x1 + 1;
+        int y2 = y1 + 1;
+        
+        int x3 = x1 + 2;
+        int y3 = y1 + 2;
+        
+        //TODO remove code duplication
+        float t0 = cubicinterpolate(
+                getVoxel(x0, y0, z),
+                getVoxel(x1, y0, z),
+                getVoxel(x2, y0, z),
+                getVoxel(x3, y0, z),
+                x - x1);      
+        float t1 = cubicinterpolate(
+                getVoxel(x0, y1, z),
+                getVoxel(x1, y1, z),
+                getVoxel(x2, y1, z),
+                getVoxel(x3, y1, z),
+                x - x1); 
+        float t2 = cubicinterpolate(
+                getVoxel(x0, y2, z),
+                getVoxel(x1, y2, z),
+                getVoxel(x2, y2, z),
+                getVoxel(x3, y2, z),
+                x - x1); 
+        float t3 = cubicinterpolate(
+                getVoxel(x0, y3, z),
+                getVoxel(x1, y3, z),
+                getVoxel(x2, y3, z),
+                getVoxel(x3, y3, z),
+                x - x1); 
+        
+        float result = cubicinterpolate(t0, t1, t2, t3, y - y1);
                             
         return result; 
 
@@ -134,14 +183,21 @@ public class Volume {
                 || coord[2] < 1 || coord[2] > (dimZ-3)) {
             return 0;
         }
-       
-
-        // to be implemented              
-        float result = 1.0f;
-                            
-        return result; 
+        float z = (float)coord[2];
         
-
+        int z1 = (int) Math.floor(coord[2]); 
+        int z0 = z1 - 1;
+        int z2 = z1 + 1;
+        int z3 = z1 + 2;
+        
+        float t0 = bicubicinterpolateXY(coord, z0);
+        float t1 = bicubicinterpolateXY(coord, z1);
+        float t2 = bicubicinterpolateXY(coord, z2);
+        float t3 = bicubicinterpolateXY(coord, z3);
+                     
+        float result = cubicinterpolate(t0, t1, t2, t3, z - z1);
+        result = result < 0 ? 0 : result > 255 ? 255 : result;                
+        return result; 
     }
 
 
