@@ -282,14 +282,50 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         
         if (compositingMode) {
             // 1D transfer function 
-            voxel_color.r = 1;voxel_color.g =0;voxel_color.b =0;voxel_color.a =1;
+            voxel_color.r = 0;
+            voxel_color.g = 0;
+            voxel_color.b = 0;
+            voxel_color.a = 1;
             opacity = 1;
+            
+            double[] increments = new double[3];
+            VectorMath.setVector(increments, rayVector[0] * sampleStep, rayVector[1] * sampleStep, rayVector[2] * sampleStep);
+
+            // Compute the number of times we need to sample
+            double distance = VectorMath.distance(entryPoint, exitPoint);
+            int nrSamples = 1 + (int) Math.floor(distance / sampleStep);
+
+            //the current position is initialized as the entry point
+            double[] currentPos = new double[3];
+            VectorMath.setVector(currentPos, exitPoint[0], exitPoint[1], exitPoint[2]);
+            
+            double accIntensity = 0;
+            do {
+                // Compute The value for the current position
+                double value = volume.getVoxelLinearInterpolate(currentPos);
+                
+                // Use value to fetch transfer-function value
+                TFColor c = tFunc.getColor((int) value);
+                
+                // compute the accumulated color
+                voxel_color.r = c.a * c.r + (1 - c.a) * voxel_color.r;
+                voxel_color.g = c.a * c.g + (1 - c.a) * voxel_color.r;
+                voxel_color.b = c.a * c.b + (1 - c.a) * voxel_color.b;
+                
+                // Update position
+                for (int i = 0; i < 3; i++) {
+                    currentPos[i] -= increments[i];
+                }
+                
+                // @TODO: Dynamic cutoff 
+                nrSamples--;
+            } while (nrSamples > 0);
         }    
         if (tf2dMode) {
              // 2D transfer function 
             voxel_color.r = 0;voxel_color.g =1;voxel_color.b =0;voxel_color.a =1;
-            opacity = 1;      
-        }
+            opacity = 1;
+        } 
         if (shadingMode) {
             // Shading mode on
             voxel_color.r = 1;voxel_color.g =0;voxel_color.b =1;voxel_color.a =1;
