@@ -60,13 +60,10 @@ public class GradientVolume {
 //This function linearly interpolates gradient vector g0 and g1 given the factor (t) 
 //the resut is given at result. You can use it to tri-linearly interpolate the gradient 
     
-	private void interpolate(VoxelGradient g0, VoxelGradient g1, float factor, VoxelGradient result) {
-            
-            // to be implemented
-            
-        result.x = 1;
-        result.y = 1;
-        result.z = 1;
+    private void interpolate(VoxelGradient g0, VoxelGradient g1, float factor, VoxelGradient result) {        
+        result.x = factor * g0.x + (1 - factor) * g1.x;
+        result.y = factor * g0.y + (1 - factor) * g1.y;
+        result.z = factor * g0.z + (1 - factor) * g1.z;
         result.mag = (float) Math.sqrt(result.x * result.x + result.y * result.y + result.z * result.z);
     }
 	
@@ -77,11 +74,36 @@ public class GradientVolume {
 // right now it returns the nearest neighbour        
         
     public VoxelGradient getGradient(double[] coord) {
+        if (coord[0] < 0 || coord[0] > (dimX-2) || coord[1] < 0 || coord[1] > (dimY-2)
+                || coord[2] < 0 || coord[2] > (dimZ-2)) {
+            return new VoxelGradient();
+        }
         
-        // to be implemented
-
-        return getGradientNN(coord);
-
+        float dx = (float) (coord[0] - Math.floor(coord[0]));
+        float dy = (float) (coord[1] - Math.floor(coord[1]));
+        float dz = (float) (coord[2] - Math.floor(coord[2]));
+        
+        int x = (int) Math.floor(coord[0]);
+        int y = (int) Math.floor(coord[1]);
+        int z = (int) Math.floor(coord[2]);
+        
+        // Horizontal
+        VoxelGradient t_temp_0 = new VoxelGradient();
+        VoxelGradient t_temp_1 = new VoxelGradient();
+        VoxelGradient t_vertical_0 = new VoxelGradient();
+        VoxelGradient t_vertical_1 = new VoxelGradient();
+        interpolate(getGradient(x, y, z), getGradient(x+1, y, z), dx, t_temp_0);
+        interpolate(getGradient(x, y+1, z), getGradient(x+1, y+1, z), dx, t_temp_1);
+        interpolate(t_temp_0, t_temp_1, dy, t_vertical_0);
+        
+        // Height
+        interpolate(getGradient(x, y, z+1), getGradient(x+1, y, z+1), dx, t_temp_0);
+        interpolate(getGradient(x, y+1, z+1), getGradient(x+1, y+1, z+1), dx, t_temp_1);
+        interpolate(t_temp_0, t_temp_1, dy, t_vertical_1);
+        
+        // Depth
+        interpolate(t_vertical_0, t_vertical_1, dz, t_temp_0);
+        return t_temp_0;
     }
     
     
