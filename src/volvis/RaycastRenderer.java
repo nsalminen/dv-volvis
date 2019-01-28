@@ -246,7 +246,12 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
             if (value > iso_value) {
                 // Found isosurface: Use value to compute color and then break
                 // isoColor contains the isosurface color from the interface
-                r = isoColor.r;g = isoColor.g;b =isoColor.b;alpha =1.0;
+                VoxelGradient gradient = gradients.getGradient(currentPos);
+                TFColor color = this.computePhongShading(isoColor, gradient, lightVector, rayVector);
+                r = color.r;
+                g = color.g;
+                b = color.b;
+                alpha = 1.0;
                 break;
             }
             for (int i = 0; i < 3; i++) {
@@ -369,10 +374,28 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     TFColor computePhongShading(TFColor voxel_color, VoxelGradient gradient, double[] lightVector,
             double[] rayVector) {
 
-        // To be implemented 
+        // In a 3D scalar field, the gradient evaluated on an isosurface is the (unnormalized) normal
+        double[] normal = {gradient.x / gradient.mag, gradient.y / gradient.mag, gradient.z / gradient.mag};
+        
+        double k_a = 0.1;
+        double k_d = 0.7;
+        double k_s = 0.2;
+        double alpha = 100;
+        
+        // @TODO: Is the lightVector already normalized?
+        double diffuse = VectorMath.dotproduct(normal, lightVector);
+        
+        double[] vecR = {
+            2 * diffuse * normal[0] - lightVector[0],
+            2 * diffuse * normal[1] - lightVector[1],
+            2 * diffuse * normal[2] - lightVector[2]
+        };
+        double specular = Math.pow(VectorMath.dotproduct(rayVector, vecR), alpha);
         
         TFColor color = new TFColor(0,0,0,1);
-        
+        color.r = (k_a * voxel_color.r) + (k_d * diffuse * voxel_color.r) + (k_s * specular);
+        color.g = (k_a * voxel_color.g) + (k_d * diffuse * voxel_color.g) + (k_s * specular);
+        color.b = (k_a * voxel_color.b) + (k_d * diffuse * voxel_color.b) + (k_s * specular);
         
         return color;
     }
