@@ -384,6 +384,12 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         
         // @TODO: Is the lightVector already normalized?
         double diffuse = VectorMath.dotproduct(normal, lightVector);
+        if (diffuse < 0) {
+            normal[0] *= -1;
+            normal[1] *= -1;
+            normal[2] *= -1; 
+        }
+        diffuse = VectorMath.dotproduct(normal, lightVector);
         
         double[] vecR = {
             2 * diffuse * normal[0] - lightVector[0],
