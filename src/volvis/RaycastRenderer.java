@@ -248,10 +248,12 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 // isoColor contains the isosurface color from the interface
                 VoxelGradient gradient = gradients.getGradient(currentPos);
                 TFColor color = this.computePhongShading(isoColor, gradient, lightVector, rayVector);
+      
                 r = color.r;
                 g = color.g;
                 b = color.b;
                 alpha = 1.0;
+              
                 break;
             }
             for (int i = 0; i < 3; i++) {
@@ -397,12 +399,12 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
             2 * diffuse * normal[2] - lightVector[2]
         };
         double specular = Math.pow(VectorMath.dotproduct(rayVector, vecR), alpha);
-        
+       
         TFColor color = new TFColor(0,0,0,1);
         color.r = (k_a * voxel_color.r) + (k_d * diffuse * voxel_color.r) + (k_s * specular);
         color.g = (k_a * voxel_color.g) + (k_d * diffuse * voxel_color.g) + (k_s * specular);
         color.b = (k_a * voxel_color.b) + (k_d * diffuse * voxel_color.b) + (k_s * specular);
-        
+       
         return color;
     }
     

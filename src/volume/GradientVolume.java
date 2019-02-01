@@ -92,17 +92,17 @@ public class GradientVolume {
         VoxelGradient t_temp_1 = new VoxelGradient();
         VoxelGradient t_vertical_0 = new VoxelGradient();
         VoxelGradient t_vertical_1 = new VoxelGradient();
-        interpolate(getGradient(x, y, z), getGradient(x+1, y, z), dx, t_temp_0);
-        interpolate(getGradient(x, y+1, z), getGradient(x+1, y+1, z), dx, t_temp_1);
-        interpolate(t_temp_0, t_temp_1, dy, t_vertical_0);
+        interpolate(getGradient(x, y, z), getGradient(x+1, y, z), 1.f - dx, t_temp_0);
+        interpolate(getGradient(x, y+1, z), getGradient(x+1, y+1, z), 1.f - dx, t_temp_1);
+        interpolate(t_temp_0, t_temp_1, 1.f - dy, t_vertical_0);
         
         // Height
-        interpolate(getGradient(x, y, z+1), getGradient(x+1, y, z+1), dx, t_temp_0);
-        interpolate(getGradient(x, y+1, z+1), getGradient(x+1, y+1, z+1), dx, t_temp_1);
-        interpolate(t_temp_0, t_temp_1, dy, t_vertical_1);
+        interpolate(getGradient(x, y, z+1), getGradient(x+1, y, z+1), 1.f - dx, t_temp_0);
+        interpolate(getGradient(x, y+1, z+1), getGradient(x+1, y+1, z+1), 1.f - dx, t_temp_1);
+        interpolate(t_temp_0, t_temp_1, 1.f - dy, t_vertical_1);
         
         // Depth
-        interpolate(t_vertical_0, t_vertical_1, dz, t_temp_0);
+        interpolate(t_vertical_0, t_vertical_1, 1.f - dz, t_temp_0);
         return t_temp_0;
     }
     
