@@ -244,6 +244,9 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         do {            
             double value = volume.getVoxelLinearInterpolate(currentPos); 
             if (value > iso_value) {
+              
+                bisection_accuracy(currentPos, increments, sampleStep, value, iso_value);     
+        
                 // Found isosurface: Use value to compute color and then break
                 // isoColor contains the isosurface color from the interface
                 VoxelGradient gradient = gradients.getGradient(currentPos);
@@ -270,15 +273,64 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     //////////////////////////////////////////////////////////////////////
     ///////////////// FUNCTION TO BE IMPLEMENTED /////////////////////////
     ////////////////////////////////////////////////////////////////////// 
-    
+
     // Given the current sample position, increment vector of the sample (vector from previous sample to current sample) and sample Step. 
    // Previous sample value and current sample value, isovalue value
     // The function should search for a position where the iso_value passes that it is more precise.
-   void  bisection_accuracy (double[] currentPos, double[] increments,double sampleStep, float previousvalue,float value, float iso_value)
-   {
-
-           // to be implemented
+   void bisection_accuracy (double[] currentPos, double[] increments,double sampleStep, double value, float iso_value) {
+        
+        double[] prevPos = new double[3];
+        //check if iso_value is before or after currentPos
+        for (int i = 0; i < 3; i++) 
+        {
+           prevPos[i] = currentPos[i] - increments[i] *sampleStep;
+        }
+        double prevValue = volume.getVoxelLinearInterpolate(prevPos);
+        if ((prevValue > iso_value) == (value > iso_value)) {
+            sampleStep *= -1;
+            for (int i = 0; i < 3; i++) 
+            {
+               prevPos[i] = currentPos[i] - increments[i] *sampleStep;
+            }
+            prevValue = volume.getVoxelLinearInterpolate(prevPos);
+            if ((prevValue > iso_value) == (value > iso_value)) {
+                return; // iso_value is not in range
+            }
+        }
+        
+        // check if nextPos is a vallid position
+        if (prevPos[0] < 0 || prevPos[0] > (volume.getDimX()-2) || prevPos[1] < 0 || prevPos[1] > (volume.getDimY()-2)
+                || prevPos[2] < 0 || prevPos[2] > (volume.getDimZ()-2)) {
+            return;
+        }
+        
+        bisection_accuracy(currentPos, increments, sampleStep, prevValue, value, iso_value, 25);
+   
    }
+   void bisection_accuracy (double[] currentPos, double[] increments,double sampleStep, double previousvalue,double value, float iso_value, int depth) {
+        if (Math.abs(value - iso_value) < 0.001) {
+            return;
+        }
+        if (depth < 0) {
+           return;
+        }
+        
+        sampleStep *= 0.5;
+        
+        // we are past the iso point thus go to the other direction
+        if ((previousvalue > iso_value) != (value > iso_value)) {
+            sampleStep *= -1;
+        }
+        
+        // goto the midpoint
+        for (int i = 0; i < 3; i++) 
+        {
+            currentPos[i] += increments[i] *sampleStep;
+        }
+        double nextValue = volume.getVoxelLinearInterpolate(currentPos);
+        bisection_accuracy(currentPos, increments, sampleStep, value, nextValue,iso_value, --depth);
+   }
+   
     
     //////////////////////////////////////////////////////////////////////
     ///////////////// FUNCTION TO BE IMPLEMENTED /////////////////////////
