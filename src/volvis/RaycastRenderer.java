@@ -59,7 +59,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
 
     private float get_res_factor()
     {
-        return interactiveMode ? 1.0f : res_factor;
+        return interactiveMode ? 2.0f : res_factor;
     }
     
     //////////////////////////////////////////////////////////////////////
@@ -379,12 +379,13 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
             // Compute the number of times we need to sample
             double distance = VectorMath.distance(entryPoint, exitPoint);
             int nrSamples = 1 + (int) Math.floor(distance / sampleStep);
-
+            int samples = nrSamples;
             //the current position is initialized as the entry point
             double[] currentPos = new double[3];
-            VectorMath.setVector(currentPos, exitPoint[0], exitPoint[1], exitPoint[2]);
+            VectorMath.setVector(currentPos, entryPoint[0], entryPoint[1], entryPoint[2]);
             
             double accIntensity = 0;
+            double accumulatedTransparency = 1.0;
             do {
                 // Compute The value for the current position
                 double value = volume.getVoxelLinearInterpolate(currentPos);
@@ -393,13 +394,20 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 TFColor c = tFunc.getColor((int) value);
                 
                 // compute the accumulated color
-                voxel_color.r = c.a * c.r + (1 - c.a) * voxel_color.r;
-                voxel_color.g = c.a * c.g + (1 - c.a) * voxel_color.r;
-                voxel_color.b = c.a * c.b + (1 - c.a) * voxel_color.b;
+                voxel_color.r += accumulatedTransparency * c.a * c.r; 
+                voxel_color.g += accumulatedTransparency * c.a * c.g; 
+                voxel_color.b += accumulatedTransparency * c.a * c.b;
                 
+                accumulatedTransparency *= (1 - c.a);
+
                 // Update position
                 for (int i = 0; i < 3; i++) {
-                    currentPos[i] -= increments[i];
+                    currentPos[i] += increments[i];
+                }
+                
+                // stop when accumulatedTransparency is almost 0
+                if (accumulatedTransparency < 0.001) {
+                    nrSamples = 0;
                 }
                 
                 // @TODO: Dynamic cutoff 
