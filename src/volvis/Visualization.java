@@ -20,6 +20,8 @@ import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 import util.TFChangeListener;
 import util.TrackballInteractor;
 
@@ -171,8 +173,15 @@ public class Visualization implements GLEventListener, TFChangeListener {
     
     class MouseWheelHandler implements MouseWheelListener {
 
+       
+        Timer timer = new Timer();
+        
         @Override
         public void mouseWheelMoved(MouseWheelEvent e) {
+            timer.cancel();
+            timer.purge();
+            timer = new Timer();
+            
             if (e.getWheelRotation() < 0) { // up
                 fov--;
                 if (fov < 2) {
@@ -181,7 +190,21 @@ public class Visualization implements GLEventListener, TFChangeListener {
             } else { // down
                 fov++;
             }
+            for (int i = 0; i < renderers.size(); i++) {
+                   renderers.get(i).setInteractiveMode(true);
+            }
             update();
+            TimerTask task =  new TimerTask() {
+                @Override
+                public void run() { 
+                     for (int i = 0; i < renderers.size(); i++) {
+                       renderers.get(i).setInteractiveMode(false);
+                   }
+                   update();
+                }
+            };
+            timer.schedule(task, 1000);
+            
         }
         
     }

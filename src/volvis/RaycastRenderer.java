@@ -57,6 +57,10 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     private float max_res_factor=0.25f;
     private TFColor isoColor; 
 
+    private float get_res_factor()
+    {
+        return interactiveMode ? 1.0f : res_factor;
+    }
     
     //////////////////////////////////////////////////////////////////////
     ///////////////// FUNCTION TO BE MODIFIED    /////////////////////////
@@ -76,6 +80,8 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         double[] viewVec = new double[3];
         double[] uVec = new double[3];
         double[] vVec = new double[3];
+        float render_res_factor = get_res_factor();
+        
         getViewPlaneVectors(viewMatrix,viewVec,uVec,vVec);
 
         // The result of the visualization is saved in an image(texture)
@@ -83,8 +89,8 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         // If the resolution is 0.25 we will sample 4 times more points. 
         for(int k=0;k<3;k++)
         {
-            uVec[k]=res_factor*uVec[k];
-            vVec[k]=res_factor*vVec[k];
+            uVec[k]=render_res_factor*uVec[k];
+            vVec[k]=render_res_factor*vVec[k];
         }
 
         // compute the volume center
@@ -106,8 +112,8 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         
         // imageW/ image H contains the real width of the image we will use given the resolution. 
         //The resolution is generated once based on the maximum resolution.
-        imageW = (int) (imageW*((max_res_factor/res_factor)));
-        imageH = (int) (imageH*((max_res_factor/res_factor)));
+        imageW = (int) (imageW*((max_res_factor/render_res_factor)));
+        imageH = (int) (imageH*((max_res_factor/render_res_factor)));
 
         // sample on a plane through the origin of the volume data
         double max = volume.getMaximum();
@@ -477,7 +483,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         double[] pixelCoord = new double[3];
         double[] entryPoint = new double[3];
         double[] exitPoint = new double[3];
-        
+        float render_res_factor = get_res_factor();
         // increment in the pixel domain in pixel units
         int increment = 1;
         // sample step in voxel units
@@ -497,8 +503,8 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         // If the resolution is 0.25 we will sample 4 times more points. 
         for(int k=0;k<3;k++)
         {
-            uVec[k]=res_factor*uVec[k];
-            vVec[k]=res_factor*vVec[k];
+            uVec[k]=render_res_factor*uVec[k];
+            vVec[k]=render_res_factor*vVec[k];
         }
         
        // We get the size of the image/texture we will be puting the result of the 
@@ -513,8 +519,8 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         
         // imageW/ image H contains the real width of the image we will use given the resolution. 
         //The resolution is generated once based on the maximum resolution.
-        imageW = (int) (imageW*((max_res_factor/res_factor)));
-        imageH = (int) (imageH*((max_res_factor/res_factor)));
+        imageW = (int) (imageW*((max_res_factor/render_res_factor)));
+        imageH = (int) (imageH*((max_res_factor/render_res_factor)));
         
         //The rayVector is pointing towards the scene
         double[] rayVector = new double[3];
@@ -982,7 +988,7 @@ public double computeOpacity2DTF(double material_value, double material_r,
         // draw rendered image as a billboard texture
         texture.enable(gl);
         texture.bind(gl);
-        double halfWidth = res_factor*image.getWidth() / 2.0;
+        double halfWidth = get_res_factor()*image.getWidth() / 2.0;
         gl.glPushMatrix();
         gl.glLoadIdentity();
         gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
