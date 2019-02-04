@@ -371,37 +371,25 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         int nrSamples = 1 + (int) Math.floor(distance / sampleStep);
         //the current position is initialized as the entry point
         double[] currentPos = new double[3];
-        double[] increments = new double[3];
-        VectorMath.setVector(increments, rayVector[0] * sampleStep, rayVector[1] * sampleStep, rayVector[2] * sampleStep);
+        double[] steps = new double[3];
+        VectorMath.setVector(steps, rayVector[0] * sampleStep, rayVector[1] * sampleStep, rayVector[2] * sampleStep);
         VectorMath.setVector(currentPos, entryPoint[0], entryPoint[1], entryPoint[2]);
         
         if (compositingMode || tf2dMode) {
-
-            voxel_color = computeColor1DTF(currentPos, increments, nrSamples, lightVector, rayVector); 
-        }
-
-        if (tf2dMode) {
-             // 2D transfer function 
-        //    voxel_color.r = 0;voxel_color.g =1;voxel_color.b =0;voxel_color.a =1;
-        //    opacity = 1;
-        } 
-        if (shadingMode) {
-
-   //         voxel_color.r = 1;voxel_color.g =0;voxel_color.b =1;voxel_color.a =1;
-     //       opacity = 1;     
+            voxel_color = computeColorTF(currentPos, steps, nrSamples, lightVector, rayVector); 
         }
 
         r = voxel_color.r;
         g = voxel_color.g;
         b = voxel_color.b;
         alpha = voxel_color.a;;
-            
+
         //computes the color
         int color = computeImageColor(r,g,b,alpha);
         return color;
     }
     
-    TFColor computeColor1DTF(double[] currentPos, double[] increments, int nrSamples, double[] lightVector, double[] rayVector)
+    TFColor computeColorTF(double[] currentPos, double[] increments, int nrSamples, double[] lightVector, double[] rayVector)
     {
         TFColor voxel_color = new TFColor();
         
@@ -422,6 +410,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
             if (tf2dMode || shadingMode)
                 gradient = gradients.getGradient(currentPos);
             if (tf2dMode){
+                c = tFunc2D.color;
                 c.a = computeOpacity2DTF(value, gradient.mag);
             }
             if (shadingMode) {
@@ -429,8 +418,8 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 c = this.computePhongShading(c, gradient, lightVector, rayVector);
             }
             // compute the accumulated color
-            voxel_color.r += accumulatedTransparency * c.a * c.r; 
-            voxel_color.g += accumulatedTransparency * c.a * c.g; 
+            voxel_color.r += accumulatedTransparency * c.a * c.r;
+            voxel_color.g += accumulatedTransparency * c.a * c.g;
             voxel_color.b += accumulatedTransparency * c.a * c.b;
 
             accumulatedTransparency *= (1 - c.a);
