@@ -107,13 +107,13 @@ public class GradientVolume {
                                         getGradient((int) xC, (int) yF, (int) zF), 1.f - dx);
         VoxelGradient c01 = interpolate(getGradient((int) xF, (int) yF, (int) zC),
                                         getGradient((int) xC, (int) yF, (int) zC), 1.f - dx);
-        VoxelGradient c10 = interpolate(getGradient((int) xF, (int) yF, (int) zF),
-                                        getGradient((int) xC, (int) yC, (int) zC), 1.f - dx);
-        VoxelGradient c11 = interpolate(getGradient((int) xF, (int) yF, (int) zF),
+        VoxelGradient c10 = interpolate(getGradient((int) xF, (int) yC, (int) zF),
+                                        getGradient((int) xC, (int) yC, (int) zF), 1.f - dx);
+        VoxelGradient c11 = interpolate(getGradient((int) xF, (int) yC, (int) zC),
                                         getGradient((int) xC, (int) yC, (int) zC), 1.f - dx);
         
         // Interpolate along the y-axis
-        VoxelGradient c0 = interpolate(c00, c10, 1.f - dy);
+        VoxelGradient c0 = interpolate(c00,c10, 1.f - dy);
         VoxelGradient c1 = interpolate(c01,c11, 1.f - dy);
         
         // Interpolate along the z-axis
