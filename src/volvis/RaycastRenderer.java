@@ -410,8 +410,8 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
             if (tf2dMode || shadingMode)
                 gradient = gradients.getGradient(currentPos);
             if (tf2dMode){
-                c = tFunc2D.color;
-                c.a = computeOpacity2DTF(value, gradient.mag);
+                c = new TFColor(tFunc2D.color.r, tFunc2D.color.g, tFunc2D.color.b, tFunc2D.color.a);
+                c.a *= computeOpacity2DTF(value, gradient.mag);
             }
             if (shadingMode) {
                 gradient = gradients.getGradient(currentPos);
