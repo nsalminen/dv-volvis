@@ -371,12 +371,12 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         int nrSamples = 1 + (int) Math.floor(distance / sampleStep);
         //the current position is initialized as the entry point
         double[] currentPos = new double[3];
-        double[] steps = new double[3];
-        VectorMath.setVector(steps, rayVector[0] * sampleStep, rayVector[1] * sampleStep, rayVector[2] * sampleStep);
+        double[] increments = new double[3];
+        VectorMath.setVector(increments, rayVector[0] * sampleStep, rayVector[1] * sampleStep, rayVector[2] * sampleStep);
         VectorMath.setVector(currentPos, entryPoint[0], entryPoint[1], entryPoint[2]);
         
         if (compositingMode || tf2dMode) {
-            voxel_color = computeColorTF(currentPos, steps, nrSamples, lightVector, rayVector); 
+            voxel_color = computeColorTF(currentPos, increments, nrSamples, lightVector, rayVector); 
         }
 
         r = voxel_color.r;
