@@ -2,7 +2,7 @@
 
 ## weight
 ```
-    private float weight (float x)//, Boolean one_two_sample) TODO no clue what the one_two_sample is
+    private float weight (float x)
     {
         float a = -0.5f;
         x = (x < 0) ? -x : x;
@@ -55,7 +55,6 @@
         int x3 = x1 + 2;
         int y3 = y1 + 2;
         
-        //TODO remove code duplication
         float t0 = cubicinterpolate(
                 getVoxel(x0, y0, z),
                 getVoxel(x1, y0, z),
@@ -264,6 +263,9 @@
 
 ## Bisection Accuracy
 ```
+      // Given the current sample position, increment vector of the sample (vector from previous sample to current sample) and sample Step. 
+   // Previous sample value and current sample value, isovalue value
+    // The function should search for a position where the iso_value passes that it is more precise.
    void bisection_accuracy (double[] currentPos, double[] increments,double sampleStep, double value, float iso_value) {
         
         double[] prevPos = new double[3];
@@ -294,6 +296,9 @@
         bisection_accuracy(currentPos, increments, sampleStep, prevValue, value, iso_value, 25);
    
    }
+   
+   //wrapper for the actual bisection_accuracy search. This method first checks if the iso_value is in its search range. 
+   //Then it gets the initial previous value and finally it calls the actual bisection_accuracy search method.
    void bisection_accuracy (double[] currentPos, double[] increments,double sampleStep, double previousvalue,double value, float iso_value, int depth) {
         if (Math.abs(value - iso_value) < 0.001) {
             return;
@@ -334,7 +339,7 @@
         double k_s = 0.2;
         double alpha = 100;
         
-        // Lightvector is already normalized
+        //make sure the the normal is facing the viewer
         double diffuse = VectorMath.dotproduct(normal, lightVector);
         if (diffuse < 0) {
             normal[0] *= -1;

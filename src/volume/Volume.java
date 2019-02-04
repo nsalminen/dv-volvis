@@ -84,7 +84,7 @@ public class Volume {
     ////////////////////////////////////////////////////////////////////// 
         
     // Function that computes the weights for one of the 4 samples involved in the 1D interpolation 
-    private float weight (float x)//, Boolean one_two_sample) TODO no clue what the one_two_sample is
+    private float weight (float x)
     {
         float a = -0.5f;
         x = (x < 0) ? -x : x;
@@ -141,7 +141,6 @@ public class Volume {
         int x3 = x1 + 2;
         int y3 = y1 + 2;
         
-        //TODO remove code duplication
         float t0 = cubicinterpolate(
                 getVoxel(x0, y0, z),
                 getVoxel(x1, y0, z),
@@ -170,7 +169,6 @@ public class Volume {
         float result = cubicinterpolate(t0, t1, t2, t3, y - y1);
                             
         return result; 
-
     }
             
     //////////////////////////////////////////////////////////////////////

@@ -316,6 +316,9 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         bisection_accuracy(currentPos, increments, sampleStep, prevValue, value, iso_value, 25);
    
    }
+   
+   //wrapper for the actual bisection_accuracy search. This method first checks if the iso_value is in its search range. 
+   //Then it gets the initial previous value and finally it calls the actual bisection_accuracy search method.
    void bisection_accuracy (double[] currentPos, double[] increments,double sampleStep, double previousvalue,double value, float iso_value, int depth) {
         if (Math.abs(value - iso_value) < 0.001) {
             return;
