@@ -104,20 +104,20 @@ public class GradientVolume {
         
         // Interpolate along the x-axis
         VoxelGradient c00 = interpolate(getGradient((int) xF, (int) yF, (int) zF),
-                                        getGradient((int) xC, (int) yF, (int) zF), dx);
+                                        getGradient((int) xC, (int) yF, (int) zF), 1.f - dx);
         VoxelGradient c01 = interpolate(getGradient((int) xF, (int) yF, (int) zC),
-                                        getGradient((int) xC, (int) yF, (int) zC), dx);
+                                        getGradient((int) xC, (int) yF, (int) zC), 1.f - dx);
         VoxelGradient c10 = interpolate(getGradient((int) xF, (int) yF, (int) zF),
-                                        getGradient((int) xC, (int) yC, (int) zC), dx);
+                                        getGradient((int) xC, (int) yC, (int) zC), 1.f - dx);
         VoxelGradient c11 = interpolate(getGradient((int) xF, (int) yF, (int) zF),
-                                        getGradient((int) xC, (int) yC, (int) zC), dx);
+                                        getGradient((int) xC, (int) yC, (int) zC), 1.f - dx);
         
         // Interpolate along the y-axis
-        VoxelGradient c0 = interpolate(c00, c10, dy);
-        VoxelGradient c1 = interpolate(c01,c11, dy);
+        VoxelGradient c0 = interpolate(c00, c10, 1.f - dy);
+        VoxelGradient c1 = interpolate(c01,c11, 1.f - dy);
         
         // Interpolate along the z-axis
-        VoxelGradient c = interpolate(c0, c1, dz);
+        VoxelGradient c = interpolate(c0, c1, 1.f - dz);
         
         return c;
     }
