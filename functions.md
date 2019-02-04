@@ -1,7 +1,7 @@
-# Functions for Project
+# Implemented functions - Group 16
 
 ## weight
-```
+~~~java
     private float weight (float x)
     {
         float a = -0.5f;
@@ -17,11 +17,11 @@
        
         return (float)result; 
    }
-```
+~~~
 
 
 ## cubicInterpolate
-```
+~~~java
     private float cubicinterpolate(float g0, float g1, float g2, float g3, float factor) {
        
         float dx0 = 1 + factor;
@@ -34,10 +34,10 @@
         return result; 
     }
 
-```
+~~~
 
 ## bicubicInterpolate
-```
+~~~java
     private float bicubicinterpolateXY(double[] coord,int z) {
         
         float x = (float)coord[0];
@@ -85,10 +85,10 @@
         return result; 
 
     }
-```
+~~~
 
 ## cubicInterpolate
-```
+~~~java
     public float getVoxelTriCubicInterpolate(double[] coord) {
         if (coord[0] < 1 || coord[0] > (dimX-3) || coord[1] < 1 || coord[1] > (dimY-3)
                 || coord[2] < 1 || coord[2] > (dimZ-3)) {
@@ -110,11 +110,11 @@
         result = result < 0 ? 0 : result > 255 ? 255 : result;                
         return result; 
     }
-```
+~~~
 
 
 ## getGradient
-```
+~~~java
     public VoxelGradient getGradient(double[] coord) {
         if (coord[0] < 0 || coord[0] > (dimX-2) || coord[1] < 0 || coord[1] > (dimY-2)
                 || coord[2] < 0 || coord[2] > (dimZ-2)) {
@@ -153,11 +153,11 @@
         
         return c;
     }
-```
+~~~
 
 
 ## TraceRayComposite
-```
+~~~java
     int traceRayComposite(double[] entryPoint, double[] exitPoint, double[] rayVector, double sampleStep) {
         double[] lightVector = new double[3];
         
@@ -197,11 +197,11 @@
         int color = computeImageColor(r,g,b,alpha);
         return color;
     }
-```
+~~~
 
 
 ## TraceRayISO
-```
+~~~java
    int traceRayIso(double[] entryPoint, double[] exitPoint, double[] rayVector, double sampleStep) {
        
         double[] lightVector = new double[3];
@@ -258,11 +258,11 @@
         int color = computeImageColor(r,g,b,alpha);
         return color;
     }
-```
+~~~
 
 
 ## Bisection Accuracy
-```
+~~~java
       // Given the current sample position, increment vector of the sample (vector from previous sample to current sample) and sample Step. 
    // Previous sample value and current sample value, isovalue value
     // The function should search for a position where the iso_value passes that it is more precise.
@@ -322,10 +322,10 @@
         double nextValue = volume.getVoxelLinearInterpolate(currentPos);
         bisection_accuracy(currentPos, increments, sampleStep, value, nextValue,iso_value, --depth);
    }
-```
+~~~
 
 ## ComputePhongShading
-```
+~~~java
     TFColor computePhongShading(TFColor voxel_color, VoxelGradient gradient, double[] lightVector,
             double[] rayVector) {
         if (gradient.mag < 0.0001)
@@ -363,10 +363,10 @@
        
         return color;
     }
-```
+~~~
 
 ## ComputeOpacity2DTF
-```
+~~~java
 public double computeOpacity2DTF(double voxelValue, double gradMagnitude) {
     double opacity = 0.0;
     
@@ -385,4 +385,4 @@ public double computeOpacity2DTF(double voxelValue, double gradMagnitude) {
     
     return opacity;
 }
-```
+~~~
