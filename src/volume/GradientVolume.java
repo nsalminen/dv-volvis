@@ -60,50 +60,66 @@ public class GradientVolume {
 //This function linearly interpolates gradient vector g0 and g1 given the factor (t) 
 //the resut is given at result. You can use it to tri-linearly interpolate the gradient 
     
+    // This function linearly interpolates gradient vector g0 and g1 given the factor (t), and returns
+    // the value through the result variable
     private void interpolate(VoxelGradient g0, VoxelGradient g1, float factor, VoxelGradient result) {        
         result.x = factor * g0.x + (1 - factor) * g1.x;
         result.y = factor * g0.y + (1 - factor) * g1.y;
         result.z = factor * g0.z + (1 - factor) * g1.z;
         result.mag = (float) Math.sqrt(result.x * result.x + result.y * result.y + result.z * result.z);
     }
+    
+    // This function linearly interpolates gradient vector g0 and g1 given the factor (t), and returns
+    // the value in a new VoxelGradient object
+    private VoxelGradient interpolate(VoxelGradient g0, VoxelGradient g1, float factor) {     
+        VoxelGradient result = new VoxelGradient();
+        result.x = factor * g0.x + (1 - factor) * g1.x;
+        result.y = factor * g0.y + (1 - factor) * g1.y;
+        result.z = factor * g0.z + (1 - factor) * g1.z;
+        result.mag = (float) Math.sqrt(result.x * result.x + result.y * result.y + result.z * result.z);
+        return result;
+    }
 	
 //////////////////////////////////////////////////////////////////////
 ///////////////// FUNCTION TO BE IMPLEMENTED /////////////////////////
-//////////////////////////////////////////////////////////////////////
-// This function should return linearly interpolated gradient for position coord[]
-// right now it returns the nearest neighbour        
-        
+//////////////////////////////////////////////////////////////////////    
+    // Returns the linearly interpolated gradient for position coord[]
     public VoxelGradient getGradient(double[] coord) {
         if (coord[0] < 0 || coord[0] > (dimX-2) || coord[1] < 0 || coord[1] > (dimY-2)
                 || coord[2] < 0 || coord[2] > (dimZ-2)) {
-            return new VoxelGradient();
+            return zero;
         }
         
-        float dx = (float) (coord[0] - Math.floor(coord[0]));
-        float dy = (float) (coord[1] - Math.floor(coord[1]));
-        float dz = (float) (coord[2] - Math.floor(coord[2]));
+        // Compute the rounded up/down coordinate values
+        double xF = Math.floor(coord[0]);
+        double xC = Math.ceil(coord[0]);
+        double yF = Math.floor(coord[1]);
+        double yC = Math.ceil(coord[1]);
+        double zF = Math.floor(coord[2]);
+        double zC = Math.ceil(coord[2]);
         
-        int x = (int) Math.floor(coord[0]);
-        int y = (int) Math.floor(coord[1]);
-        int z = (int) Math.floor(coord[2]);
+        float dx = (float)(coord[0] - xF);
+        float dy = (float)(coord[1] - yF);
+        float dz = (float)(coord[2] - zF);
         
-        // Horizontal
-        VoxelGradient t_temp_0 = new VoxelGradient();
-        VoxelGradient t_temp_1 = new VoxelGradient();
-        VoxelGradient t_vertical_0 = new VoxelGradient();
-        VoxelGradient t_vertical_1 = new VoxelGradient();
-        interpolate(getGradient(x, y, z), getGradient(x+1, y, z), 1.f - dx, t_temp_0);
-        interpolate(getGradient(x, y+1, z), getGradient(x+1, y+1, z), 1.f - dx, t_temp_1);
-        interpolate(t_temp_0, t_temp_1, 1.f - dy, t_vertical_0);
+        // Interpolate along the x-axis
+        VoxelGradient c00 = interpolate(getGradient((int) xF, (int) yF, (int) zF),
+                                        getGradient((int) xC, (int) yF, (int) zF), dx);
+        VoxelGradient c01 = interpolate(getGradient((int) xF, (int) yF, (int) zC),
+                                        getGradient((int) xC, (int) yF, (int) zC), dx);
+        VoxelGradient c10 = interpolate(getGradient((int) xF, (int) yF, (int) zF),
+                                        getGradient((int) xC, (int) yC, (int) zC), dx);
+        VoxelGradient c11 = interpolate(getGradient((int) xF, (int) yF, (int) zF),
+                                        getGradient((int) xC, (int) yC, (int) zC), dx);
         
-        // Height
-        interpolate(getGradient(x, y, z+1), getGradient(x+1, y, z+1), 1.f - dx, t_temp_0);
-        interpolate(getGradient(x, y+1, z+1), getGradient(x+1, y+1, z+1), 1.f - dx, t_temp_1);
-        interpolate(t_temp_0, t_temp_1, 1.f - dy, t_vertical_1);
+        // Interpolate along the y-axis
+        VoxelGradient c0 = interpolate(c00, c10, dy);
+        VoxelGradient c1 = interpolate(c01,c11, dy);
         
-        // Depth
-        interpolate(t_vertical_0, t_vertical_1, 1.f - dz, t_temp_0);
-        return t_temp_0;
+        // Interpolate along the z-axis
+        VoxelGradient c = interpolate(c0, c1, dz);
+        
+        return c;
     }
     
     
