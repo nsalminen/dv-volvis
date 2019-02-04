@@ -22,10 +22,13 @@ public class GradientVolume {
     private int dimX, dimY, dimZ;
     private VoxelGradient zero = new VoxelGradient();
     VoxelGradient[] data;
+    Float[] laplace;
+    
     Volume volume;
     double maxmag;
     
 //If needed add new attributes here:
+    private float maxLaplace;
 
 
     //Do NOT modify this function
@@ -37,6 +40,7 @@ public class GradientVolume {
 
         for (int i=0; i<data.length; i++) {
             data[i] = zero;
+            laplace[i] = 0.0f;
         }
        
         for (int z=1; z<dimZ-1; z++) {
@@ -50,7 +54,21 @@ public class GradientVolume {
                 }
             }
         }
+        
+        for (int z=2; z<dimZ-2; z++) {
+            for (int y=2; y<dimY-2; y++) {
+                for (int x=2; x<dimX-2; x++) {         
+                    float l = volume.getVoxel(x-1, y, z) + volume.getVoxel(x+1, y, z) 
+                            +  volume.getVoxel(x, y + 1, z) + volume.getVoxel(x, y - 1, z)
+                             +  volume.getVoxel(x, y, z + 1) + volume.getVoxel(x, y, z - 1) 
+                            - 6 * volume.getVoxel(x, y, z); 
+                   
+                    setLaplace(x, y, z, l);
+                }
+            }
+        }
         maxmag=calculateMaxGradientMagnitude();
+        maxLaplace = calculateMaxLaplace();
      }
     	
     
@@ -123,6 +141,44 @@ public class GradientVolume {
     }
     
     
+     public float getLaplace(double[] coord) {
+        if (coord[0] < 1 || coord[0] > (dimX-3) || coord[1] < 1 || coord[1] > (dimY-3)
+                || coord[2] < 1 || coord[2] > (dimZ-3)) {
+            return 0;
+        }
+        
+        // Compute the rounded up/down coordinate values
+        double xF = Math.floor(coord[0]);
+        double xC = Math.ceil(coord[0]);
+        double yF = Math.floor(coord[1]);
+        double yC = Math.ceil(coord[1]);
+        double zF = Math.floor(coord[2]);
+        double zC = Math.ceil(coord[2]);
+        
+        float dx = (float)(coord[0] - xF);
+        float dy = (float)(coord[1] - yF);
+        float dz = (float)(coord[2] - zF);
+        
+        // Interpolate along the x-axis
+        float c00 = getLaplace((int) xF, (int) yF, (int) zF) * (1-dx) + 
+                    getLaplace((int) xC, (int) yF, (int) zF) * dx;
+        float c01 = getLaplace((int) xF, (int) yF, (int) zC) * (1-dx) + 
+                    getLaplace((int) xC, (int) yF, (int) zC) * dx;
+        float c10 = getLaplace((int) xF, (int) yC, (int) zF) * (1-dx) + 
+                    getLaplace((int) xC, (int) yC, (int) zF) * dx;
+        float c11 = getLaplace((int) xF, (int) yC, (int) zC) * (1-dx) + 
+                    getLaplace((int) xC, (int) yC, (int) zC) * dx;
+                                
+   
+        // Interpolate along the y-axis
+        float c0 = c00 * (1 - dy) + c10 * dy;
+        float c1 = c01* (1 - dy) + c11 * dy;
+        
+        // Interpolate along the z-axis
+        float c = c0 * ( 1.f - dz) +  c1 * dz;
+        return c;
+    }
+    
     
     //Do NOT modify this function
     public VoxelGradient getGradientNN(double[] coord) {
@@ -153,6 +209,19 @@ public class GradientVolume {
         }
     }
     
+    private float calculateMaxLaplace() {
+        if (maxLaplace >= 0.f) {
+            return maxLaplace;
+        } else {
+            float max = laplace[0];
+            for (int i=0; i<laplace.length; i++) {
+                max = laplace[i] > max ? laplace[i] : max;
+            }   
+            maxLaplace = max;
+            return maxLaplace;
+        }
+    }
+        
     //Do NOT modify this function
     public double getMaxGradientMagnitude()
     {
@@ -170,6 +239,7 @@ public class GradientVolume {
         dimY = vol.getDimY();
         dimZ = vol.getDimZ();
         data = new VoxelGradient[dimX * dimY * dimZ];
+        laplace = new Float[dimX * dimY * dimZ];
         maxmag = -1.0;
         compute();
     }
@@ -178,12 +248,20 @@ public class GradientVolume {
 	public VoxelGradient getGradient(int x, int y, int z) {
         return data[x + dimX * (y + dimY * z)];
     }
+        
+    public float getLaplace(int x, int y, int z) {
+        return laplace[x + dimX * (y + dimY * z)];
+    }
 
   
   
     //Do NOT modify this function
     public void setGradient(int x, int y, int z, VoxelGradient value) {
         data[x + dimX * (y + dimY * z)] = value;
+    }
+    
+    public void setLaplace(int x, int y, int z, float value) {
+        laplace[x + dimX * (y + dimY * z)] = value;
     }
 
     //Do NOT modify this function
@@ -209,6 +287,10 @@ public class GradientVolume {
     //Do NOT modify this function
     public int getDimZ() {
         return dimZ;
+    }
+
+    public int getMaxLaplace() {
+        return (int) maxLaplace;
     }
 
 }

@@ -20,6 +20,8 @@ public class TransferFunction2D {
     public double radius;
     public TFColor color;
     public double maxMagnitude, minMagnitude;
+    public boolean useLaplace;
+    public float maxLaplace;
 
         public TransferFunction2D(short base, double r, double maxGrad) {
             this.baseIntensity = base;
