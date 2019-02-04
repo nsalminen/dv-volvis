@@ -437,7 +437,6 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 nrSamples = 0;
             }
 
-            // @TODO: Dynamic cutoff 
             nrSamples--;
         } while (nrSamples > 0);
         return voxel_color;
@@ -459,7 +458,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         double k_s = 0.2;
         double alpha = 100;
         
-        // @TODO: Is the lightVector already normalized?
+        //make sure the the normal is facing the viewer
         double diffuse = VectorMath.dotproduct(normal, lightVector);
         if (diffuse < 0) {
             normal[0] *= -1;
