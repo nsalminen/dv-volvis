@@ -256,7 +256,10 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
                 // Found isosurface: Use value to compute color and then break
                 // isoColor contains the isosurface color from the interface
                 VoxelGradient gradient = gradients.getGradient(currentPos);
-                TFColor color = this.computePhongShading(isoColor, gradient, lightVector, rayVector);
+                TFColor color = isoColor;
+                if (shadingMode) {
+                    color = this.computePhongShading(isoColor, gradient, lightVector, rayVector);
+                }
       
                 r = color.r;
                 g = color.g;
@@ -373,16 +376,19 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         VectorMath.setVector(currentPos, entryPoint[0], entryPoint[1], entryPoint[2]);
         
         if (compositingMode) {
-            voxel_color = computeColor1DTF(currentPos, increments, nrSamples); 
+
+            voxel_color = computeColor1DTF(currentPos, increments, nrSamples, lightVector, rayVector); 
         }
+
         if (tf2dMode) {
              // 2D transfer function 
             voxel_color.r = 0;voxel_color.g =1;voxel_color.b =0;voxel_color.a =1;
             opacity = 1;
         } 
         if (shadingMode) {
-            // Shading mode on
-            voxel_color.r = 1;voxel_color.g =0;voxel_color.b =1;voxel_color.a =1;
+
+   //         voxel_color.r = 1;voxel_color.g =0;voxel_color.b =1;voxel_color.a =1;
+     //       opacity = 1;     
         }
 
         r = voxel_color.r;
@@ -395,7 +401,8 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         return color;
     }
     
-    TFColor computeColor1DTF(double[] currentPos, double[] increments, int nrSamples){
+    TFColor computeColor1DTF(double[] currentPos, double[] increments, int nrSamples, double[] lightVector, double[] rayVector)
+    {
         TFColor voxel_color = new TFColor();
         
         // 1D transfer function
@@ -411,7 +418,10 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
 
             // Use value to fetch transfer-function value
             TFColor c = tFunc.getColor((int) value);
-
+            if (shadingMode) {
+                VoxelGradient gradient = gradients.getGradient(currentPos);
+                c = this.computePhongShading(c, gradient, lightVector, rayVector);
+            }
             // compute the accumulated color
             voxel_color.r += accumulatedTransparency * c.a * c.r; 
             voxel_color.g += accumulatedTransparency * c.a * c.g; 
@@ -441,7 +451,8 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
     // Compute Phong Shading given the voxel color (material color), the gradient, the light vector and view vector 
     TFColor computePhongShading(TFColor voxel_color, VoxelGradient gradient, double[] lightVector,
             double[] rayVector) {
-
+        if (gradient.mag < 0.0001)
+            return voxel_color;
         // In a 3D scalar field, the gradient evaluated on an isosurface is the (unnormalized) normal
         double[] normal = {gradient.x / gradient.mag, gradient.y / gradient.mag, gradient.z / gradient.mag};
         
@@ -466,7 +477,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         };
         double specular = Math.pow(VectorMath.dotproduct(rayVector, vecR), alpha);
        
-        TFColor color = new TFColor(0,0,0,1);
+        TFColor color = new TFColor(0,0,0,voxel_color.a);
         color.r = (k_a * voxel_color.r) + (k_d * diffuse * voxel_color.r) + (k_s * specular);
         color.g = (k_a * voxel_color.g) + (k_d * diffuse * voxel_color.g) + (k_s * specular);
         color.b = (k_a * voxel_color.b) + (k_d * diffuse * voxel_color.b) + (k_s * specular);
@@ -570,7 +581,7 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
 // triangle widget tFunc2D contains the values of the baseintensity and radius
 // tFunc2D.baseIntensity, tFunc2D.radius they are in image intensity units
 
-public double computeOpacity2DTF(double material_value, double material_r,
+//public double computeOpacity2DTF(double material_value, double material_r,
 public double computeOpacity2DTF(double voxelValue, double gradMagnitude) {
     double opacity = 0.0;
     

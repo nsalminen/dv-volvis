@@ -136,12 +136,39 @@ public class Visualization implements GLEventListener, TFChangeListener {
     public void dispose(GLAutoDrawable glad) {
         
     }
-
+    Timer timer = new Timer();
+    void updateLowRes() {
+        timer.cancel();
+        timer.purge();
+        timer = new Timer();
+        for (int i = 0; i < renderers.size(); i++) {
+            renderers.get(i).setInteractiveMode(true);
+        }
+        update();
+        delayUpdateHighRes();
+    }
+    
+    void delayUpdateHighRes() {
+        TimerTask task =  new TimerTask() {
+            @Override
+            public void run() { 
+                 for (int i = 0; i < renderers.size(); i++) {
+                   renderers.get(i).setInteractiveMode(false);
+               }
+               update();
+            }
+        };
+        timer.schedule(task, 1000);
+    }
    
    class MousePressListener extends MouseAdapter {
 
        @Override
        public void mousePressed(MouseEvent e) {
+            timer.cancel();
+            timer.purge();
+            timer = new Timer();
+        
            trackball.setMousePos(e.getX(), e.getY());
            
            for (int i = 0; i < renderers.size(); i++) {
@@ -154,7 +181,7 @@ public class Visualization implements GLEventListener, TFChangeListener {
            for (int i = 0; i < renderers.size(); i++) {
                renderers.get(i).setInteractiveMode(false);
            }
-           update();
+           delayUpdateHighRes();
        }
    }
    
@@ -165,23 +192,16 @@ public class Visualization implements GLEventListener, TFChangeListener {
         public void mouseDragged(MouseEvent e) {
              trackball.drag(e.getX(), e.getY());
              trackball.setRotating(true);
-             update();
+             updateLowRes();
           }
           
         }
     
     
     class MouseWheelHandler implements MouseWheelListener {
-
-       
-        Timer timer = new Timer();
         
         @Override
-        public void mouseWheelMoved(MouseWheelEvent e) {
-            timer.cancel();
-            timer.purge();
-            timer = new Timer();
-            
+        public void mouseWheelMoved(MouseWheelEvent e) {             
             if (e.getWheelRotation() < 0) { // up
                 fov--;
                 if (fov < 2) {
@@ -190,21 +210,8 @@ public class Visualization implements GLEventListener, TFChangeListener {
             } else { // down
                 fov++;
             }
-            for (int i = 0; i < renderers.size(); i++) {
-                   renderers.get(i).setInteractiveMode(true);
-            }
-            update();
-            TimerTask task =  new TimerTask() {
-                @Override
-                public void run() { 
-                     for (int i = 0; i < renderers.size(); i++) {
-                       renderers.get(i).setInteractiveMode(false);
-                   }
-                   update();
-                }
-            };
-            timer.schedule(task, 1000);
-            
+
+            updateLowRes(); 
         }
         
     }
