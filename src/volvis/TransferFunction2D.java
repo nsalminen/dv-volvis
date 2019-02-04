@@ -19,12 +19,14 @@ public class TransferFunction2D {
     // width of half of the triangle in intensity value units 
     public double radius;
     public TFColor color;
-        
+    public double maxMagnitude, minMagnitude;
 
-        public TransferFunction2D(short base, double r) {
+        public TransferFunction2D(short base, double r, double maxGrad) {
             this.baseIntensity = base;
             this.radius = r;
             this.color = new TFColor(0.0, 204.0/255.0, 153.0/255.0, 0.3);
+            this.minMagnitude = 0;
+            this.maxMagnitude = maxGrad;
         }
         
         public void SetBaseRadius(short base, double r)

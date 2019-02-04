@@ -34,6 +34,7 @@ public class TransferFunction2DEditor extends javax.swing.JPanel {
     public double[] histogram;
     private short maxIntensity;
     public double maxGradientMagnitude;
+
     private ArrayList<TFChangeListener> listeners = new ArrayList<TFChangeListener>();
 
     

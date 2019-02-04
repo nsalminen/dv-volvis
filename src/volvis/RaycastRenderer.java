@@ -588,7 +588,7 @@ public double computeOpacity2DTF(double voxelValue, double gradMagnitude) {
     double voxelAngle = Math.atan(dCenter / gradMagnitude);
     
     // Assign an opacity if the voxel is located inside the specified triangle
-    if(voxelAngle < theta) {
+    if(voxelAngle < theta && gradMagnitude <= tFunc2D.maxMagnitude && gradMagnitude >= tFunc2D.minMagnitude) {
         double centerDist = voxelAngle / theta;
         opacity = 1 - centerDist;
     } // If not, the voxel will be transparent
@@ -722,7 +722,7 @@ public double computeOpacity2DTF(double voxelValue, double gradMagnitude) {
         tFunc.addTFChangeListener(this);
         tfEditor = new TransferFunctionEditor(tFunc, volume.getHistogram());
         
-        tFunc2D= new TransferFunction2D((short) (volume.getMaximum() / 2), 0.2*volume.getMaximum());
+        tFunc2D= new TransferFunction2D((short) (volume.getMaximum() / 2), 0.2*volume.getMaximum(), gradients.getMaxGradientMagnitude());
         tfEditor2D = new TransferFunction2DEditor(tFunc2D,volume, gradients);
         tfEditor2D.addTFChangeListener(this);
 
