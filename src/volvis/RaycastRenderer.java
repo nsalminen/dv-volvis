@@ -375,15 +375,15 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
         VectorMath.setVector(increments, rayVector[0] * sampleStep, rayVector[1] * sampleStep, rayVector[2] * sampleStep);
         VectorMath.setVector(currentPos, entryPoint[0], entryPoint[1], entryPoint[2]);
         
-        if (compositingMode) {
+        if (compositingMode || tf2dMode) {
 
             voxel_color = computeColor1DTF(currentPos, increments, nrSamples, lightVector, rayVector); 
         }
 
         if (tf2dMode) {
              // 2D transfer function 
-            voxel_color.r = 0;voxel_color.g =1;voxel_color.b =0;voxel_color.a =1;
-            opacity = 1;
+        //    voxel_color.r = 0;voxel_color.g =1;voxel_color.b =0;voxel_color.a =1;
+        //    opacity = 1;
         } 
         if (shadingMode) {
 
@@ -418,8 +418,14 @@ public class RaycastRenderer extends Renderer implements TFChangeListener {
 
             // Use value to fetch transfer-function value
             TFColor c = tFunc.getColor((int) value);
+            VoxelGradient gradient = null;
+            if (tf2dMode || shadingMode)
+                gradient = gradients.getGradient(currentPos);
+            if (tf2dMode){
+                c.a = computeOpacity2DTF(value, gradient.mag);
+            }
             if (shadingMode) {
-                VoxelGradient gradient = gradients.getGradient(currentPos);
+                gradient = gradients.getGradient(currentPos);
                 c = this.computePhongShading(c, gradient, lightVector, rayVector);
             }
             // compute the accumulated color
