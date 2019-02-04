@@ -1,7 +1,7 @@
 # Implemented functions - Group 16
 
-# NOTE: We have not included the functions that were modified to render the data in low resolution during interactive mode. 
-# Furthermore we have also excluded the ui code for the gradient magnitude controls in the TransferFunction2DView. 
+*NOTE: We have not included the functions that were modified to render the data in low resolution during interactive mode.*
+*Furthermore, we have also excluded the ui code for the gradient magnitude controls in the TransferFunction2DView.*
 
 
 
